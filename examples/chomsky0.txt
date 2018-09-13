@@ -1,0 +1,5 @@
+G[S]
+S, A, B, C
+S::=Aa|b
+aAb::=ppp|bbb
+pB::=a|pp
