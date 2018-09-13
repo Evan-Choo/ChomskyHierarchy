@@ -130,19 +130,28 @@ public class GrammarContent {
                 return "0";
 
             case 1:
-                if(isExtended)
-                    return "1 拓展";
                 return "1";
 
             case 2:
-                if(isExtended)
-                    return "2 拓展";
                 return "2";
 
             case 3:
-                if(isLeft)
-                    return "3 左线性";
+                return "3 左线性";
+
+            case 4:
                 return "3 右线性";
+
+            case 5:
+                return "3";
+
+            case 6:
+                return "2 拓展";
+
+            case 7:
+                return "3 左线性拓展";
+
+            case 8:
+                return "3 右线性拓展";
         }
 
         return null;

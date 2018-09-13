@@ -14,21 +14,27 @@ class ProcessingUnit {
     }
 
     //处理、获取非终结符号
-    static Character[] getNonterminal(String input) {
+    static Character[] getNonterminal(String input) throws Exception{
         StringTokenizer st = new StringTokenizer(input, ",", false);
         ArrayList<Character> cs = new ArrayList<>();
 
         while (st.hasMoreTokens()) {
-            cs.add(st.nextToken().trim().charAt(0));
+            String token = st.nextToken().trim();
+
+            if(token.length()!=1)
+                throw new Exception("非终结符号长度必须为1");
+            else
+                cs.add(token.charAt(0));
         }
 
         return cs.toArray(new Character[0]);
     }
 
     //处理产生式规则，并找出终结符号集合
-    static Character[] processProductions(String[] productions, Character[] nonterminals) {
+    static Character[] processProductions(String[] productions, Character[] nonterminals) throws Exception{
         //allCharacters用来存放所有的符号
         ArrayList<Character> allCharacters = new ArrayList<>();
+        //ArrayList<Character> nts = new ArrayList<>(Arrays.asList(nonterminals));
 
         //对productions中的String进行遍历，找出所有的终结符号和非终结符号，然后通过已知的非终结符号找出终结符号
         for(String s : productions) {
@@ -36,6 +42,8 @@ class ProcessingUnit {
 
             //对左部进行处理，将左部的每一个符号添加到allCharacters
             for(int i=0; i<leftAndRight[0].trim().length(); i++) {
+//                if(leftAndRight[0].length()==1 && !hasChar(nonterminals, leftAndRight[0].charAt(0)))
+//                    throw new Exception("产生式左部不能为终结符号");
                 if(!allCharacters.contains(leftAndRight[0].charAt(i)))
                     allCharacters.add(leftAndRight[0].charAt(i));
             }
@@ -52,12 +60,24 @@ class ProcessingUnit {
             }
         }
 
+        for(Character c : nonterminals) {
+            if(!allCharacters.contains(c))
+                throw new Exception("输入的非终结符号没有出现在产生式中");
+        }
         //如果移除所有的nontermials不成功
         if(!allCharacters.removeAll(new ArrayList<Character>(Arrays.asList(nonterminals))))
             System.exit(1);
 
         return allCharacters.toArray(new Character[0]);
     }
+
+//    static boolean hasChar(Character[] input, char a) {
+//        for(Character c : input) {
+//            if(!c.equals(a))
+//                return  false;
+//        }
+//        return true;
+//    }
 
     //判断文法类型
 
@@ -76,15 +96,20 @@ class ProcessingUnit {
      *
      * 4 -> chomsky 3 type right-regular
      *
-     * 5 -> chomsky 1 type with extension
+     * 5 -> chomsky 3 type
      *
      * 6 -> chomsky 2 type with extension
+     *
+     * 7 -> chomsky 3 type left-regular with extension
+     *
+     * 8 -> chomsky 3 type right-regular with extension
      */
     static int determineGrammarType(String[] productions, Character[] nonterminals, Character[] terminals) {
         int chomskyType = -1;
         boolean isExtended = false;
         boolean isLeft = true;
         boolean is2Or3 = true;
+        boolean isFirstTimeToChangeIsLeft = true;
 
         ArrayList<Character> vns = new ArrayList<>(Arrays.asList(nonterminals));
         ArrayList<Character> vts = new ArrayList<>(Arrays.asList(terminals));
@@ -113,10 +138,13 @@ class ProcessingUnit {
             }
 
             //遍历右部的各个产生式，看是否是只有一个终结符号或者是一个终结符号与一个非终结符号，且两个符号顺序要相同
-            boolean isFirstTimeToChangeIsLeft = true; //用来保证isLeft只可以修改一次
+            //boolean isFirstTimeToChangeIsLeft = true; //用来保证isLeft只可以修改一次
             for(String string : rightElements) {
-                //如果长度不是1或者2，或者含有epsilon
-                if((string.length()!=1 && string.length()!=2) || string.contains("#")) {
+                if(string.equals("#"))
+                    continue;
+
+                //如果长度不是1或者2
+                if(string.length()!=1 && string.length()!=2) {
                     chomskyType = 2;
                     break;
                 }
@@ -190,7 +218,7 @@ class ProcessingUnit {
 
             case 1:
                 if(isExtended)
-                    return 5;
+                    return 0;
                 return 1;
 
             case 2:
@@ -199,9 +227,16 @@ class ProcessingUnit {
                 return 2;
 
             case 3:
-                if(isLeft)
+                if(isFirstTimeToChangeIsLeft)
+                    return 5;
+                if(!isExtended && isLeft)
                     return 3;
-                return 4;
+                if(!isExtended && !isLeft)
+                    return 4;
+                if(isExtended && isLeft)
+                    return 7;
+                if(isExtended && !isLeft)
+                    return 8;
         }
 
         return -1;

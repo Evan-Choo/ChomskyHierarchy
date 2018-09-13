@@ -5,7 +5,7 @@ import java.util.Scanner;
 import java.io.*;
 
 public class Main {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("选择输入模式：（1）手动输入，（2）文本输入 (使用#代表epsilon）:");
@@ -63,44 +63,7 @@ public class Main {
 
                 //判断文法类型
                 int chomskyType = ProcessingUnit.determineGrammarType(strings.toArray(new  String[0]), cs2, vts);
-                switch (chomskyType) {
-                    case 0:
-                        gc.setChomskyType(0);
-                        gc.setExtended(false);
-                        break;
-
-                    case 1:
-                        gc.setChomskyType(1);
-                        gc.setExtended(false);
-                        break;
-
-                    case 2:
-                        gc.setChomskyType(2);
-                        gc.setExtended(false);
-                        break;
-
-                    case 3:
-                        gc.setChomskyType(3);
-                        gc.setExtended(false);
-                        gc.setLeft(true);
-                        break;
-
-                    case 4:
-                        gc.setChomskyType(3);
-                        gc.setExtended(false);
-                        gc.setLeft(false);
-                        break;
-
-                    case 5:
-                        gc.setChomskyType(1);
-                        gc.setExtended(true);
-                        break;
-
-                    case 6:
-                        gc.setChomskyType(2);
-                        gc.setExtended(true);
-                        break;
-                }
+                gc.setChomskyType(chomskyType);
 
                 gc.print();
 
